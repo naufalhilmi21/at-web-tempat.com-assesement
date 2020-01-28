@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { setDefaultTimeout, After, AfterAll, BeforeAll } = require('cucumber');
+const { setDefaultTimeout, After, AfterAll, BeforeAll, Before } = require('cucumber');
 const {
   createSession,
   closeSession,
@@ -13,7 +13,6 @@ setDefaultTimeout(60000);
 
 BeforeAll(async () => {
   await startWebDriver({ env: process.env.NIGHTWATCH_ENV || 'chromeHeadless' });
-  await createSession();
 });
 
 AfterAll(async () => {
@@ -34,6 +33,11 @@ AfterAll(async () => {
   }, 1000);
 });
 
-After(function() {
+Before(async () => {
+  await createSession();
+});
+
+After(async () => {
   getNewScreenshots().forEach(file => this.attach(fs.readFileSync(file), 'image/png'));
+  await closeSession();
 });
